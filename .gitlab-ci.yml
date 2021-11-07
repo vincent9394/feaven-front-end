@@ -1,0 +1,26 @@
+stages:
+  - build
+  - docker
+
+build:
+  stage: build
+  image: node:14-alpine
+  script:
+    - echo "Start building Feaven APP"
+    - npm install
+    - npm run build
+    - echo "Feaven APP built successfully!"
+  artifacts:
+    paths:
+      - build
+
+docker:
+  stage: docker
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" $CI_REGISTRY
+  script:
+    - docker build --pull -t "${CI_REGISTRY_IMAGE}" .
+    - docker push "${CI_REGISTRY_IMAGE}"
